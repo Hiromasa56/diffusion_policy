@@ -172,6 +172,7 @@ def main(output, robot_ip, vis_camera_idx, init_joints, frequency, command_laten
                     target_pose[3]+=cl_state[3]
                     target_pose[4]+=cl_state[4]
                     target_pose[5]+=cl_state[5]
+                    print('action', target_pose)
 
                     # execute teleop command
                     # TODO：cmdのところ確認

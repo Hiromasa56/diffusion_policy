@@ -22,10 +22,10 @@ shape_meta: &shape_meta
     #   shape: ${task.image_shape}
     #   type: rgb
     robot_eef_pose:
-      shape: [2]
+      shape: [6]
       type: low_dim
   action: 
-    shape: [2]
+    shape: [6]
 
 env_runner:
   _target_: diffusion_policy.env_runner.real_pusht_image_runner.RealPushTImageRunner

@@ -77,7 +77,7 @@ class Control(mp.Process):
     def get_motion_state(self):
         # TODO:たぶんここの形確認する必要ある
         state = self.ring_buffer.get()
-        print('state', state)
+        # print('state', state)
         state = np.array(state['motion_event'][:6], 
             dtype=self.dtype) #/ self.max_value
         is_dead = (-self.deadzone < state) & (state < self.deadzone)

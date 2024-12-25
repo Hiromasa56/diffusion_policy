@@ -171,15 +171,19 @@ def main(input, output, robot_ip, match_dataset, match_episode,
             print("Warming up policy inference")
             obs = env.get_obs()
             with torch.no_grad():
-                policy.reset()
+                policy.reset() #なんかここで動いてそう
                 obs_dict_np = get_real_obs_dict(
                     env_obs=obs, shape_meta=cfg.task.shape_meta)
                 obs_dict = dict_apply(obs_dict_np, 
                     lambda x: torch.from_numpy(x).unsqueeze(0).to(device))
                 result = policy.predict_action(obs_dict)
+                print("Warming up policy inference", result)
                 action = result['action'][0].detach().to('cpu').numpy()
-                assert action.shape[-1] == 2
+                print('fngiehi', action.shape[-1])
+                # assert action.shape[-1] == 2
+                print('fngiehi', action.shape[-1])
                 del result
+                print('fngiehi', action.shape[-1])
 
             print('Ready!')
             while True:
@@ -252,9 +256,9 @@ def main(input, output, robot_ip, match_dataset, match_episode,
                     #     # 2D translation mode
                     #     dpos[2] = 0   
                     cl_state = cl.get_motion_state()
-                    print('control', cl_state) 
+                    # print('control', cl_state) 
 
-                    print('pose', target_pose)
+                    # print('pose', target_pose)
                     target_pose[0]+=cl_state[0]
                     target_pose[1]+=cl_state[1]
                     target_pose[2]+=cl_state[2]
@@ -312,21 +316,27 @@ def main(input, output, robot_ip, match_dataset, match_episode,
                             result = policy.predict_action(obs_dict)
                             # this action starts from the first obs step
                             action = result['action'][0].detach().to('cpu').numpy()
+                            print('aaaa', action)
                             print('Inference latency:', time.time() - s)
+                        print('aadajfa', delta_action)
                         
                         # convert policy action to env actions
                         if delta_action:
-                            assert len(action) == 1
+                            # assert len(action) == 1
+                            print('afsj', perv_target_pose)
                             if perv_target_pose is None:
                                 perv_target_pose = obs['robot_eef_pose'][-1]
+                            print('afsj', perv_target_pose)
                             this_target_pose = perv_target_pose.copy()
                             this_target_pose[[0,1]] += action[-1]
                             perv_target_pose = this_target_pose
                             this_target_poses = np.expand_dims(this_target_pose, axis=0)
+                            print('this', this_target_pose)
+                        # こっちのほうが行動を連続的に受け取っている
                         else:
                             this_target_poses = np.zeros((len(action), len(target_pose)), dtype=np.float64)
                             this_target_poses[:] = target_pose
-                            this_target_poses[:,[0,1]] = action
+                            this_target_poses[:,[0, 1, 2, 3, 4, 5]] = action
 
                         # deal with timing
                         # the same step actions are always the target for
@@ -347,9 +357,9 @@ def main(input, output, robot_ip, match_dataset, match_episode,
                             this_target_poses = this_target_poses[is_new]
                             action_timestamps = action_timestamps[is_new]
 
-                        # clip actions
-                        this_target_poses[:,:2] = np.clip(
-                            this_target_poses[:,:2], [0.25, -0.45], [0.77, 0.40])
+                        # # clip actions
+                        # this_target_poses[:,:2] = np.clip(
+                        #     this_target_poses[:,:2], [0.25, -0.45], [0.77, 0.40])
 
                         # execute actions
                         env.exec_actions(
